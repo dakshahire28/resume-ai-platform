@@ -4,18 +4,41 @@ import API from '../api/api';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState({ _id: 'guest_id', name: 'Guest User', email: 'guest@careerpilot.io' });
-  const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Auth check disabled for public access
+  // Restore auth state from persisted storage.
   useEffect(() => {
-    // const storedUser = localStorage.getItem('user');
-    // const storedToken = localStorage.getItem('token');
-    // if (storedUser && storedToken) {
-    //   setUser(JSON.parse(storedUser));
-    // }
-    setLoading(false);
+    const restoreSession = async () => {
+    const storedUser = localStorage.getItem('user');
+    const storedToken = localStorage.getItem('token');
+
+      if (!storedUser || !storedToken) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        const { data } = await API.get('/auth/profile');
+
+        setUser({
+          _id: data._id ?? parsedUser._id,
+          name: data.name ?? parsedUser.name,
+          email: data.email ?? parsedUser.email,
+        });
+      } catch (error) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    restoreSession();
   }, []);
 
   // Register

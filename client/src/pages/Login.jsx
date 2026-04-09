@@ -10,11 +10,6 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // If already logged in, redirect to dashboard
-  useEffect(() => {
-    if (user) navigate('/dashboard');
-  }, [user, navigate]);
-
   // Clear error on field change
   useEffect(() => {
     if (error) clearError();
@@ -106,7 +101,9 @@ export default function Login() {
             <div className="space-y-1 relative">
               <div className="flex items-center justify-between ml-1">
                 <label className="text-xs font-semibold text-text-secondary uppercase tracking-wider">Password</label>
-                <a href="#" className="text-xs text-primary hover:underline font-medium">Forgot password?</a>
+                <Link to="/forgot-password" className="text-xs text-primary hover:underline font-medium">
+                  Forgot password?
+                </Link>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={18} />

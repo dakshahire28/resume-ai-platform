@@ -1,11 +1,12 @@
-import { BrowserRouter as Router, Routes, Route, Outlet, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import Resources from './pages/Resources';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import ForgotPassword from './pages/ForgotPassword';
 import ResumeBuilder from './pages/ResumeBuilder';
 import ResumeAnalyzer from './pages/ResumeAnalyzer';
 import Roadmaps from './pages/Roadmaps';
@@ -34,6 +35,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/builder" element={<ResumeBuilder />} />
           <Route element={<Layout />}>
             <Route path="/dashboard" element={<Dashboard />} />

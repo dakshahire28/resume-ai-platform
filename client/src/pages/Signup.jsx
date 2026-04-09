@@ -11,11 +11,6 @@ export default function Signup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // If already logged in, redirect to dashboard
-  useEffect(() => {
-    if (user) navigate('/dashboard');
-  }, [user, navigate]);
-
   // Clear error on field change
   useEffect(() => {
     if (error) clearError();
@@ -25,7 +20,7 @@ export default function Signup() {
     e.preventDefault();
     const success = await register(name, email, password);
     if (success) {
-      navigate('/dashboard');
+      navigate('/login');
     }
   };
 
