@@ -45,10 +45,10 @@ export default function Home() {
           >
             {isDark ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          <Link to="/login" className="px-5 py-2 text-sm font-medium hover:text-primary transition-colors rounded text-text-main border border-border bg-surface shadow-sm">
-            Log In
+          <Link to="/dashboard" className="px-5 py-2 text-sm font-medium hover:text-primary transition-colors rounded text-text-main border border-border bg-surface shadow-sm">
+            Dashboard
           </Link>
-          <Link to="/login" className="px-5 py-2 text-sm font-medium bg-primary hover:bg-primary/90 text-white rounded transition-colors hidden sm:block shadow-sm">
+          <Link to="/dashboard" className="px-5 py-2 text-sm font-medium bg-primary hover:bg-primary/90 text-white rounded transition-colors hidden sm:block shadow-sm">
             Get Started
           </Link>
         </div>
@@ -75,10 +75,10 @@ export default function Home() {
             Our AI-powered workspace helps you build resumes, analyze skills, and land your dream role with confidence.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-            <Link to="/login" className="px-8 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg text-lg transition-colors flex items-center justify-center gap-2 shadow-md">
+            <Link to="/builder" className="px-8 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg text-lg transition-colors flex items-center justify-center gap-2 shadow-md">
               Build Resume
             </Link>
-            <Link to="/login" className="px-8 py-4 border border-border hover:border-primary bg-surface text-text-main font-semibold rounded-lg text-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
+            <Link to="/dashboard" className="px-8 py-4 border border-border hover:border-primary bg-surface text-text-main font-semibold rounded-lg text-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
               Explore Platform
             </Link>
           </div>
@@ -152,10 +152,10 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/login" className="px-6 py-3 border border-border hover:border-primary text-sm font-medium rounded transition-colors text-text-secondary hover:text-text-main bg-background shadow-sm hover:shadow-md">
+            <Link to="/resources" className="px-6 py-3 border border-border hover:border-primary text-sm font-medium rounded transition-colors text-text-secondary hover:text-text-main bg-background shadow-sm hover:shadow-md">
               Explore Resources
             </Link>
-            <Link to="/login" className="px-6 py-3 border border-border hover:border-primary text-sm font-medium rounded transition-colors text-text-secondary hover:text-text-main bg-background shadow-sm hover:shadow-md">
+            <Link to="/roadmaps" className="px-6 py-3 border border-border hover:border-primary text-sm font-medium rounded transition-colors text-text-secondary hover:text-text-main bg-background shadow-sm hover:shadow-md">
               Explore Roadmaps
             </Link>
           </div>
@@ -166,7 +166,7 @@ export default function Home() {
       <section className="pt-24 pb-12 px-4 text-center bg-background border-t border-border">
         <h2 className="text-4xl font-bold mb-6 text-text-main">Ready to launch?</h2>
         <p className="text-text-secondary mb-8 text-lg">Join thousands of job seekers taking control of their career trajectory.</p>
-        <Link to="/login" className="inline-flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg text-lg transition-colors shadow-md">
+        <Link to="/dashboard" className="inline-flex items-center gap-2 px-8 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg text-lg transition-colors shadow-md">
           Get Started Now <ArrowRight size={20} />
         </Link>
       </section>

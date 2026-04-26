@@ -1,6 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from './Logo';
-import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard,
   FileText,
@@ -25,7 +24,6 @@ const NAV_ITEMS = [
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
 
   return (
     <aside className="w-[260px] min-w-[260px] bg-background h-full border-r border-border flex flex-col z-50 transition-colors duration-300">
@@ -68,7 +66,7 @@ export default function Sidebar() {
           className="flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary hover:text-red-500 hover:bg-red-500/5 transition-all duration-200 group cursor-pointer mb-2"
         >
           <LogOut size={18} strokeWidth={2} className="transition-transform group-hover:scale-110" />
-          <span className="text-sm font-medium">Logout</span>
+          <span className="text-sm font-medium">Home</span>
         </button>
       </nav>
     </aside>

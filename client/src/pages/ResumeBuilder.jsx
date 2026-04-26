@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import axios from 'axios';
 import {
@@ -137,7 +136,6 @@ export default function ResumeBuilder() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const resumeId = searchParams.get('id');
-  const { user } = useAuth();
   const { isDark } = useTheme();
   const previewRef = useRef(null);
   const [saving, setSaving] = useState(false);
@@ -169,10 +167,10 @@ export default function ResumeBuilder() {
   const [resume, setResume] = useState({
     picture: { url: '', size: 80, borderRadius: 0 },
     basics: {
-      firstName: user?.name?.split(' ')[0] || 'Guest',
-      lastName: user?.name?.split(' ').slice(1).join(' ') || 'User',
+      firstName: '',
+      lastName: '',
       headline: '',
-      email: user?.email || '',
+      email: '',
       phone: '',
       location: '',
       website: '',

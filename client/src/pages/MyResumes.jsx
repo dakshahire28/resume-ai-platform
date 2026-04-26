@@ -50,7 +50,7 @@ export default function MyResumes() {
         <div className="space-y-2">
           <h2 className="text-text-muted font-bold uppercase tracking-[0.2em] text-[10px]">Dashboard</h2>
           <h1 className="text-4xl font-black text-text-main tracking-tight">My Resumes</h1>
-          <p className="text-text-secondary text-sm font-medium">Manage your collection of professional resumes and templates.</p>
+          <p className="text-text-secondary text-sm font-medium">Manage and build your collection of professional resumes.</p>
         </div>
       </div>
 

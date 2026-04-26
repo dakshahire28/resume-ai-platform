@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import { 
   Plus, 
   FileText, 
@@ -42,10 +41,8 @@ const RECENT_RESUMES = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
-  // Get the user's first name for the greeting
-  const firstName = user?.name?.split(' ')[0] || 'there';
+  const firstName = 'there';
 
   return (
     <div className="max-w-5xl mx-auto space-y-12 py-4">

@@ -1,10 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const resumeController = require('../controllers/resumeController');
-const authMiddleware = require('../middleware/authMiddleware');
-
-// All routes are public by default now
-// router.use(authMiddleware.protect);
 
 router.post('/', resumeController.createResume);
 router.get('/', resumeController.getResumes);
