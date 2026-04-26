@@ -18,9 +18,9 @@ export default function CreateResumeModal({ isOpen, onClose }) {
     try {
       const payload = {
         title: title.trim(),
-        template: 'Software Engineer',
+        template: 'Minimalist',
         settings: {
-          template: 'Software Engineer',
+          template: 'Minimalist',
           font: 'Inter',
           fontSize: 14,
           lineHeight: 1.5,

@@ -5,100 +5,131 @@ const Minimalist = ({ resume, settings }) => {
   const fullName = `${b.firstName} ${b.lastName}`.trim();
 
   const SectionTitle = ({ children }) => (
-    <h3 className="text-[11px] font-semibold uppercase tracking-[0.25em] pb-1 mb-3 border-b border-gray-200" style={{ color: settings.primaryColor }}>
-      {children}
-    </h3>
+    <div className="mb-2">
+      <h3 className="text-[14px] font-bold uppercase tracking-wider" style={{ color: settings.primaryColor || '#000000' }}>
+        {children}
+      </h3>
+      <div className="w-full h-[1.5px] mt-0.5" style={{ backgroundColor: settings.primaryColor || '#000000' }}></div>
+    </div>
   );
 
   return (
     <div
-      className="bg-white"
+      className="bg-white px-8 py-10"
       style={{
-        fontFamily: `'${settings.font}', sans-serif`,
-        fontSize: `${settings.fontSize}px`,
-        lineHeight: settings.lineHeight,
-        color: '#111827',
+        fontFamily: `'${settings.font}', serif`, // Jake's usually uses serif but we respect user setting
+        fontSize: `${settings.fontSize || 11}px`,
+        lineHeight: settings.lineHeight || 1.4,
+        color: '#000000',
       }}
     >
-      <header className="mb-6 flex items-center justify-between">
-        <div className="flex-1 text-left">
-          <h1 className="text-[34px] font-light tracking-wide mb-1 text-gray-900">{fullName || 'Your Name'}</h1>
-          {b.headline && (
-            <h2 className="text-sm font-medium uppercase tracking-[0.2em] mb-3" style={{ color: settings.primaryColor }}>
-              {b.headline}
-            </h2>
-          )}
-          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-medium text-gray-500">
-            {b.email && <span>{b.email}</span>}
-            {b.phone && <span>• {b.phone}</span>}
-            {b.location && <span>• {b.location}</span>}
-            {b.website && <span>• {b.website}</span>}
-          </div>
-          {b.summary && <p className="mt-4 text-[13px] text-gray-600 leading-relaxed max-w-[90%]">{b.summary}</p>}
+      {/* HEADER */}
+      <header className="mb-4 text-center">
+        <h1 className="text-[28px] font-bold mb-1">{fullName || 'Your Name'}</h1>
+        <div className="flex flex-wrap justify-center gap-x-2 text-[11px]">
+          {b.phone && <span>{b.phone}</span>}
+          {b.phone && b.email && <span>|</span>}
+          {b.email && <span>{b.email}</span>}
+          {b.email && (b.website || resume.profiles.length > 0) && <span>|</span>}
+          {b.website && <span>{b.website}</span>}
+          {resume.profiles.map((p, i) => (
+            <React.Fragment key={p._id || i}>
+              {(i > 0 || b.website) && <span>|</span>}
+              <span>{p.url || p.username}</span>
+            </React.Fragment>
+          ))}
         </div>
-        {resume.picture.url && (
-          <img
-            src={resume.picture.url}
-            alt="Profile"
-            style={{
-              width: resume.picture.size,
-              height: resume.picture.size,
-              borderRadius: resume.picture.borderRadius,
-              objectFit: 'cover',
-            }}
-            className="ml-6 shadow-sm border border-gray-100"
-          />
-        )}
       </header>
 
-      <div className="flex flex-col gap-6">
-        {resume.experience.length > 0 && (
-          <section>
-            <SectionTitle>Experience</SectionTitle>
-            <div className="flex flex-col gap-4">
-              {resume.experience.map(exp => (
-                <div key={exp._id}>
-                  <div className="flex justify-between items-baseline mb-0.5">
-                    <h4 className="font-bold text-[14px] text-gray-900">{exp.company}</h4>
-                    <span className="text-[11px] font-medium text-gray-500 whitespace-nowrap ml-2">
-                      {[exp.startDate, exp.endDate].filter(Boolean).join(' — ')}
-                    </span>
-                  </div>
-                  <p className="text-[13px] font-medium mb-1" style={{ color: settings.primaryColor }}>{exp.position}</p>
-                  {exp.location && <p className="text-[11px] text-gray-400 mb-2">{exp.location}</p>}
-                  {exp.summary && <p className="text-[12px] text-gray-700 leading-relaxed whitespace-pre-wrap">{exp.summary}</p>}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
+      <div className="flex flex-col gap-4">
+        {/* EDUCATION */}
         {resume.education.length > 0 && (
           <section>
             <SectionTitle>Education</SectionTitle>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               {resume.education.map(edu => (
                 <div key={edu._id}>
-                  <h4 className="font-bold text-[13px] text-gray-900 leading-tight">{edu.studyType}</h4>
-                  <p className="text-[12px] font-medium text-gray-600">{edu.institution}</p>
-                  <div className="text-[11px] text-gray-500 mt-1 flex justify-between">
-                    <span>{[edu.startDate, edu.endDate].filter(Boolean).join(' — ')}</span>
-                    {edu.score && <span className="font-bold" style={{ color: settings.primaryColor }}>{edu.score}</span>}
+                  <div className="flex justify-between items-baseline">
+                    <span className="font-bold">{edu.institution}</span>
+                    <span className="text-right">{[edu.startDate, edu.endDate].filter(Boolean).join(' – ')}</span>
                   </div>
+                  <div className="flex justify-between items-baseline italic">
+                    <span>{edu.studyType} {edu.area && `in ${edu.area}`}</span>
+                    <span className="text-right">{edu.location}</span>
+                  </div>
+                  {edu.score && <div className="mt-1">GPA: {edu.score}</div>}
+                  {edu.summary && <div className="mt-1">{edu.summary}</div>}
                 </div>
               ))}
             </div>
           </section>
         )}
 
+        {/* EXPERIENCE */}
+        {resume.experience.length > 0 && (
+          <section>
+            <SectionTitle>Experience</SectionTitle>
+            <div className="flex flex-col gap-3">
+              {resume.experience.map(exp => (
+                <div key={exp._id}>
+                  <div className="flex justify-between items-baseline">
+                    <span className="font-bold">{exp.company}</span>
+                    <span className="text-right">{[exp.startDate, exp.endDate].filter(Boolean).join(' – ')}</span>
+                  </div>
+                  <div className="flex justify-between items-baseline italic mb-1">
+                    <span>{exp.position}</span>
+                    <span className="text-right">{exp.location}</span>
+                  </div>
+                  {exp.summary && (
+                    <ul className="list-disc pl-5 mt-1 space-y-0.5">
+                      {exp.summary.split('\n').map((bullet, i) => (
+                        bullet.trim() && <li key={i}>{bullet.trim().replace(/^- /, '')}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* PROJECTS */}
+        {resume.projects && resume.projects.length > 0 && (
+          <section>
+            <SectionTitle>Projects</SectionTitle>
+            <div className="flex flex-col gap-2">
+              {resume.projects.map(proj => (
+                <div key={proj._id}>
+                  <div className="flex justify-between items-baseline mb-0.5">
+                    <span>
+                      <span className="font-bold">{proj.name}</span>
+                      {proj.url && <span> | <span className="italic">{proj.url}</span></span>}
+                    </span>
+                    <span className="text-right">{proj.date}</span>
+                  </div>
+                  {proj.description && (
+                    <ul className="list-disc pl-5 space-y-0.5">
+                      {proj.description.split('\n').map((bullet, i) => (
+                        bullet.trim() && <li key={i}>{bullet.trim().replace(/^- /, '')}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* SKILLS */}
         {resume.skills.length > 0 && (
           <section>
-            <SectionTitle>Skills</SectionTitle>
-            <div className="flex flex-wrap gap-2">
+            <SectionTitle>Technical Skills</SectionTitle>
+            <div className="flex flex-col gap-1">
               {resume.skills.map(s => (
-                <span key={s._id} className="bg-transparent border border-gray-300 text-gray-800 text-[10px] font-medium px-2 py-1 rounded">
-                  {s.name} {s.level && <span className="text-gray-400">({s.level})</span>}
-                </span>
+                <div key={s._id}>
+                  <span className="font-bold">{s.name}: </span>
+                  <span>{s.keywords}</span>
+                </div>
               ))}
             </div>
           </section>

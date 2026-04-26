@@ -21,6 +21,9 @@ import Academic from '../components/templates/Academic';
 import Infographic from '../components/templates/Infographic';
 import Elegant from '../components/templates/Elegant';
 import TechStartup from '../components/templates/TechStartup';
+import GraphicDesigner from '../components/templates/GraphicDesigner';
+import SimpleProfile from '../components/templates/SimpleProfile';
+import ModernProfessional from '../components/templates/ModernProfessional';
 
 /* ─────────── LEFT NAVIGATION SECTIONS (matches RxResu) ─────────── */
 const SECTIONS = [
@@ -62,7 +65,10 @@ const TEMPLATES = [
   'Academic',
   'Infographic',
   'Elegant',
-  'Tech Startup'
+  'Tech Startup',
+  'Graphic Designer',
+  'Simple Profile',
+  'Modern Professional'
 ];
 
 const FONT_FAMILIES = [
@@ -229,7 +235,26 @@ export default function ResumeBuilder() {
       const fetchResume = async () => {
         try {
           const res = await axios.get(`/api/resumes/${resumeId}`);
-          setResume(res.data.data || res.data);
+          setResume(prev => {
+            const fetched = res.data.data || res.data;
+            return {
+              ...prev,
+              ...fetched,
+              picture: { ...prev.picture, ...(fetched.picture || {}) },
+              basics: { ...prev.basics, ...(fetched.basics || {}) },
+              profiles: fetched.profiles || prev.profiles,
+              experience: fetched.experience || prev.experience,
+              education: fetched.education || prev.education,
+              skills: fetched.skills || prev.skills,
+              languages: fetched.languages || prev.languages,
+              interests: fetched.interests || prev.interests,
+              awards: fetched.awards || prev.awards,
+              certifications: fetched.certifications || prev.certifications,
+              publications: fetched.publications || prev.publications,
+              volunteer: fetched.volunteer || prev.volunteer,
+              references: fetched.references || prev.references,
+            };
+          });
           setSettings(res.data.settings || settings);
           const fetchedTitle = res.data.title || res.data.data?.title || 'Untitled Resume';
           setResumeTitle(fetchedTitle);
@@ -802,18 +827,7 @@ export default function ResumeBuilder() {
                 </div>
               </button>
 
-              <button 
-                onClick={handleExportDOC}
-                className="flex items-center gap-3 p-4 bg-blue-500/5 border border-blue-500/10 rounded-xl hover:bg-blue-500/10 transition-all group"
-              >
-                <div className="w-10 h-10 rounded-lg bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/20">
-                  <FileType size={20} />
-                </div>
-                <div className="text-left">
-                  <p className="text-sm font-bold text-text-main group-hover:text-blue-500 transition-colors">Download DOC</p>
-                  <p className="text-[10px] text-text-secondary">Editable Microsoft Word format</p>
-                </div>
-              </button>
+
 
               <button 
                 onClick={handleExportJSON}
@@ -900,6 +914,9 @@ export default function ResumeBuilder() {
       'Infographic': Infographic,
       'Elegant': Elegant,
       'Tech Startup': TechStartup,
+      'Graphic Designer': GraphicDesigner,
+      'Simple Profile': SimpleProfile,
+      'Modern Professional': ModernProfessional,
     };
 
     // Fallback to Minimalist if template is not found (e.g. if the user had 'Software Engineer' saved)

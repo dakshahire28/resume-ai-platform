@@ -9,7 +9,9 @@ export default function Navbar() {
   let breadcrumb = 'Dashboard';
   if (pathParts.length > 0) {
     if (pathParts[0] === 'resumes') {
-      breadcrumb = 'Template Library';
+      breadcrumb = 'Resume Builder';
+    } else if (pathParts[0] === 'analyzer') {
+      breadcrumb = 'Resume Analyzer';
     } else {
       breadcrumb = pathParts[0].charAt(0).toUpperCase() + pathParts[0].slice(1);
     }

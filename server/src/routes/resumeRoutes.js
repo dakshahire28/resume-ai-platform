@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const resumeController = require('../controllers/resumeController');
 const analyzeController = require('../controllers/analyzeController');
+const autoImproveController = require('../controllers/autoImproveController');
 
+router.post('/auto-improve', autoImproveController.autoImproveResume);
 router.post('/analyze', analyzeController.analyzeResume);
 router.post('/', resumeController.createResume);
 router.get('/', resumeController.getResumes);

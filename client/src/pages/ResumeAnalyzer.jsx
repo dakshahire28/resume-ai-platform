@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   FileText, Sparkles, CheckCircle2, 
   XOctagon, AlertTriangle, ChevronRight, LayoutTemplate, UploadCloud, RefreshCw, File
@@ -16,6 +17,8 @@ export default function ResumeAnalyzer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [results, setResults] = useState(null);
+  const [isImproving, setIsImproving] = useState(false);
+  const navigate = useNavigate();
   
   // 'pdf' or 'saved'
   const [uploadMode, setUploadMode] = useState('pdf');
@@ -128,6 +131,33 @@ export default function ResumeAnalyzer() {
     }
   };
 
+  const handleAutoImprove = async () => {
+    setIsImproving(true);
+    setError('');
+    
+    let payloadText = '';
+    if (uploadMode === 'pdf') {
+      payloadText = extractedPdfText;
+    }
+
+    try {
+      const res = await axios.post('/api/resumes/auto-improve', {
+        source: uploadMode,
+        resumeId: selectedResumeId,
+        resumeText: payloadText,
+        missingKeywords: results.missingKeywords,
+        targetJob: targetJob
+      });
+      
+      navigate(`/builder?id=${res.data.newResumeId}`);
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.error || err.response?.data?.message || err.message || "Auto-improve failed.");
+    } finally {
+      setIsImproving(false);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8 pb-12 w-full text-text-main font-sans">
       
@@ -230,7 +260,7 @@ export default function ResumeAnalyzer() {
               {loading ? (
                 <><RefreshCw size={18} className="animate-spin text-primary" /> Analyzing...</>
               ) : (
-                <><Sparkles size={18} className="text-primary" /> Optimize with AI</>
+                <><Sparkles size={18} className="text-primary" /> Analyze</>
               )}
             </div>
           </button>
@@ -251,6 +281,22 @@ export default function ResumeAnalyzer() {
           </div>
         ) : (
           <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Action Bar */}
+            <div className="flex justify-between items-center bg-surface border border-border p-4 rounded-2xl shadow-sm">
+               <div>
+                 <h2 className="text-lg font-bold">Analysis Complete</h2>
+                 <p className="text-xs text-text-secondary">Review your scores or let AI auto-fix them.</p>
+               </div>
+               <button 
+                  onClick={handleAutoImprove}
+                  disabled={isImproving}
+                  className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed shadow-md shadow-primary/20 text-sm"
+               >
+                 {isImproving ? <RefreshCw size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                 {isImproving ? "Generating..." : "Auto-Improve & Edit"}
+               </button>
+            </div>
+
             {/* Top Row: Score & Categories */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Overall Score */}

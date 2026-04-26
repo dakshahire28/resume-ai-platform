@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, MoreVertical, FileText, Download, Copy, Trash2, ExternalLink, LayoutDashboard, Clock } from 'lucide-react';
+import { Plus, MoreVertical, FileText, Download, Copy, Trash2, ExternalLink, LayoutDashboard, Clock, UploadCloud } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CreateResumeModal from '../components/CreateResumeModal';
+import ImportResumeModal from '../components/ImportResumeModal';
 
 export default function MyResumes() {
   const navigate = useNavigate();
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   useEffect(() => {
     fetchResumes();
@@ -68,6 +70,20 @@ export default function MyResumes() {
           <h3 className="font-bold text-text-main uppercase tracking-widest text-xs">New Resume</h3>
           <p className="text-[10px] font-medium text-text-secondary text-center mt-3 px-6 leading-relaxed">
             Create a professional resume from scratch or use a job-specific template.
+          </p>
+        </div>
+
+        {/* Import Card */}
+        <div 
+          onClick={() => setIsImportModalOpen(true)}
+          className="group border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center p-8 hover:border-primary/50 hover:bg-surface/50 transition-all cursor-pointer h-[340px] shadow-xl shadow-black/5"
+        >
+          <div className="w-16 h-16 rounded-full bg-surface text-text-muted flex items-center justify-center mb-6 border border-border group-hover:scale-110 group-hover:text-primary group-hover:border-primary/20 transition-all">
+            <UploadCloud size={32} strokeWidth={2.5} />
+          </div>
+          <h3 className="font-bold text-text-main uppercase tracking-widest text-xs">Import Resume</h3>
+          <p className="text-[10px] font-medium text-text-secondary text-center mt-3 px-6 leading-relaxed">
+            Upload an existing PDF and let AI convert it into an editable format.
           </p>
         </div>
 
@@ -141,6 +157,11 @@ export default function MyResumes() {
       <CreateResumeModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
+      />
+
+      <ImportResumeModal 
+        isOpen={isImportModalOpen} 
+        onClose={() => setIsImportModalOpen(false)} 
       />
     </div>
   );
