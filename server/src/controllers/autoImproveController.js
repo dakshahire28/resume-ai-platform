@@ -150,3 +150,49 @@ exports.autoImproveResume = async (req, res) => {
     res.status(500).json({ message: "Auto-improve failed", error: error.message, stack: error.stack });
   }
 };
+
+exports.generateCSS = async (req, res) => {
+  try {
+    const { prompt, currentCss } = req.body;
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ message: "GEMINI_API_KEY is missing." });
+    }
+
+    if (!prompt) {
+      return res.status(400).json({ message: "No prompt provided" });
+    }
+
+    const systemPrompt = `
+      You are an expert CSS web developer. You are writing CSS for a web-based resume builder.
+      The user wants to customize their resume design using custom CSS.
+      Based on the user's request, generate the RAW CSS code required to achieve their goal.
+      
+      RULES:
+      1. RETURN ONLY RAW CSS CODE. NO MARKDOWN FORMATTING, NO EXPLANATIONS.
+      2. DO NOT wrap the output in \`\`\`css or \`\`\`. Just raw text.
+      3. Assume standard HTML elements (h1, h2, h3, p, span, div, section, header, ul, li).
+      4. It is often safest to prefix rules with #resume-preview to scope them correctly (e.g., #resume-preview h1).
+      
+      User Request: "${prompt}"
+      
+      ${currentCss ? `Current CSS to append to or modify:\n${currentCss}\n` : ''}
+    `;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: systemPrompt,
+    });
+
+    let rawCss = response.text.trim();
+    // Clean up if the model ignores the markdown rule
+    if (rawCss.startsWith('\`\`\`css')) rawCss = rawCss.replace('\`\`\`css', '');
+    if (rawCss.startsWith('\`\`\`')) rawCss = rawCss.replace('\`\`\`', '');
+    if (rawCss.endsWith('\`\`\`')) rawCss = rawCss.slice(0, -3);
+
+    res.status(200).json({ css: rawCss.trim() });
+  } catch (error) {
+    console.error("Generate CSS failed:", error);
+    res.status(500).json({ message: "Generate CSS failed", error: error.message });
+  }
+};

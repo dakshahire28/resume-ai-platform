@@ -8,8 +8,7 @@ import {
   ChevronDown, ChevronRight, Plus, Trash2,
   Settings2, LayoutTemplate, Type, Palette, FileText, Braces,
   Undo2, Redo2, ZoomIn, ZoomOut, Maximize2,
-  Link2, FileDown, FileType, Info,
-  Home
+  Link2, FileDown, FileType, Info, Home, Wand2
 } from 'lucide-react';
 
 import Minimalist from '../components/templates/Minimalist';
@@ -164,7 +163,9 @@ export default function ResumeBuilder() {
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
 
   /* ── Zoom ── */
-  const [zoom, setZoom] = useState(80);
+  const [zoom, setZoom] = useState(100);
+  const [cssPrompt, setCssPrompt] = useState('');
+  const [isGeneratingCss, setIsGeneratingCss] = useState(false);
 
   /* ── Resume Title ── */
   const [resumeTitle, setResumeTitle] = useState(searchParams.get('title') || 'Untitled Resume');
@@ -433,6 +434,26 @@ export default function ResumeBuilder() {
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
+  };
+
+  const handleGenerateCSS = async () => {
+    if (!cssPrompt.trim()) return;
+    setIsGeneratingCss(true);
+    try {
+      const res = await axios.post('/api/resumes/generate-css', {
+        prompt: cssPrompt,
+        currentCss: settings.customCss
+      });
+      if (res.data && res.data.css) {
+        setSettings(s => ({ ...s, customCss: res.data.css }));
+        setCssPrompt(''); // Clear prompt on success
+      }
+    } catch (err) {
+      console.error('Failed to generate CSS:', err);
+      alert('Failed to generate CSS. Please try again.');
+    } finally {
+      setIsGeneratingCss(false);
+    }
   };
 
   const handleExportDOC = () => {
@@ -847,15 +868,45 @@ export default function ResumeBuilder() {
 
       case 'css':
         return (
-          <div className="space-y-4">
-            <h3 className="text-sm font-bold text-text-main">Custom CSS</h3>
-            <textarea
-              rows={16}
-              value={settings.customCss}
-              onChange={(e) => setSettings(s => ({ ...s, customCss: e.target.value }))}
-              placeholder="/* Add custom CSS here. Example: .resume-header { background: #f0f0f0; } */"
-              className="w-full bg-surface border border-border rounded-md px-3 py-2 text-xs text-text-main font-mono outline-none focus:border-primary/50 resize-none"
-            />
+          <div className="space-y-4 flex flex-col h-full">
+            <div>
+              <h3 className="text-sm font-bold text-text-main mb-2">AI CSS Generator</h3>
+              <div className="flex gap-2 mb-4">
+                <input
+                  type="text"
+                  value={cssPrompt}
+                  onChange={(e) => setCssPrompt(e.target.value)}
+                  placeholder="e.g. Make headers bold and uppercase"
+                  className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-xs text-text-main placeholder:text-text-muted outline-none focus:border-primary/50"
+                  onKeyDown={(e) => { if (e.key === 'Enter') handleGenerateCSS(); }}
+                />
+                <button
+                  onClick={handleGenerateCSS}
+                  disabled={isGeneratingCss || !cssPrompt.trim()}
+                  className="px-3 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center justify-center"
+                >
+                  {isGeneratingCss ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Wand2 size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 flex flex-col min-h-0">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-sm font-bold text-text-main">Custom CSS</h3>
+                <button 
+                  onClick={() => setSettings(s => ({ ...s, customCss: '' }))}
+                  className="text-[10px] text-text-muted hover:text-red-500 font-bold"
+                >
+                  Clear CSS
+                </button>
+              </div>
+              <textarea
+                value={settings.customCss}
+                onChange={(e) => setSettings(s => ({ ...s, customCss: e.target.value }))}
+                placeholder="/* Add custom CSS here or ask AI above. */"
+                className="w-full flex-1 min-h-[200px] bg-surface border border-border rounded-lg px-3 py-3 text-xs text-text-main font-mono outline-none focus:border-primary/50 resize-y"
+              />
+            </div>
           </div>
         );
 
@@ -934,6 +985,7 @@ export default function ResumeBuilder() {
         }}
       >
         <TemplateComponent resume={resume} settings={settings} />
+        {settings.customCss && <style>{settings.customCss}</style>}
       </div>
     );
   };

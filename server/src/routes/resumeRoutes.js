@@ -5,6 +5,7 @@ const analyzeController = require('../controllers/analyzeController');
 const autoImproveController = require('../controllers/autoImproveController');
 
 router.post('/auto-improve', autoImproveController.autoImproveResume);
+router.post('/generate-css', autoImproveController.generateCSS);
 router.post('/analyze', analyzeController.analyzeResume);
 router.post('/', resumeController.createResume);
 router.get('/', resumeController.getResumes);
