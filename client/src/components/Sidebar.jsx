@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   FileText,
   Activity,
-  Layers,
   BookOpen,
   Map,
   Settings,
@@ -13,9 +12,8 @@ import {
 
 const NAV_ITEMS = [
   { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-  { label: 'Resume Builder', path: '/builder', icon: FileText },
+  { label: 'Resume Builder', path: '/resumes', icon: FileText },
   { label: 'Resume Analyzer', path: '/analyzer', icon: Activity },
-  { label: 'My Resumes', path: '/resumes', icon: Layers },
   { label: 'Roadmaps', path: '/roadmaps', icon: Map },
   { label: 'Resources', path: '/resources', icon: BookOpen },
   { label: 'Settings', path: '/settings', icon: Settings },

@@ -52,7 +52,20 @@ const TEMPLATES = [
   'Project Manager', 
   'Academic Researcher', 
   'Executive Leadership', 
-  'General Professional'
+  'General Professional',
+  'Azurill',
+  'Bronzor',
+  'Chikorita',
+  'Ditgar',
+  'Ditto',
+  'Gengar',
+  'Glalie',
+  'Kakuna',
+  'Lapras',
+  'Leafish',
+  'Onyx',
+  'Pikachu',
+  'Rhyhorn'
 ];
 
 const FONT_FAMILIES = [
@@ -150,6 +163,9 @@ export default function ResumeBuilder() {
   /* ── Zoom ── */
   const [zoom, setZoom] = useState(80);
 
+  /* ── Resume Title ── */
+  const [resumeTitle, setResumeTitle] = useState(searchParams.get('title') || 'Untitled Resume');
+
   /* ── Design Settings ── */
   const [settings, setSettings] = useState({
     template: 'Software Engineer',
@@ -218,6 +234,8 @@ export default function ResumeBuilder() {
           const res = await axios.get(`/api/resumes/${resumeId}`);
           setResume(res.data.data || res.data);
           setSettings(res.data.settings || settings);
+          const fetchedTitle = res.data.title || res.data.data?.title || 'Untitled Resume';
+          setResumeTitle(fetchedTitle);
           // Sync history with loaded data
           const initial = JSON.stringify(res.data.data || res.data);
           setHistory([initial]);
@@ -236,7 +254,7 @@ export default function ResumeBuilder() {
     setSaving(true);
     try {
       const payload = {
-        title: `${resume.basics.firstName} ${resume.basics.lastName} Resume`.trim() || 'Untitled Resume',
+        title: resumeTitle || `${resume.basics.firstName} ${resume.basics.lastName} Resume`.trim() || 'Untitled Resume',
         template: settings.template,
         settings,
         data: resume
@@ -895,6 +913,128 @@ export default function ResumeBuilder() {
   const ResumePreview = () => {
     const b = resume.basics;
     const fullName = `${b.firstName} ${b.lastName}`.trim();
+    const selectedTemplate = settings.template || 'Software Engineer';
+
+    const TEMPLATE_LAYOUTS = {
+      'Software Engineer': 'classic',
+      'Data Scientist': 'classic',
+      'Marketing Manager': 'minimal',
+      'Creative Director': 'sidebar',
+      'Sales Executive': 'minimal',
+      'Project Manager': 'classic',
+      'Academic Researcher': 'classic',
+      'Executive Leadership': 'sidebar',
+      'General Professional': 'classic',
+      Azurill: 'minimal',
+      Bronzor: 'classic',
+      Chikorita: 'sidebar',
+      Ditgar: 'classic',
+      Ditto: 'minimal',
+      Gengar: 'sidebar',
+      Glalie: 'classic',
+      Kakuna: 'minimal',
+      Lapras: 'sidebar',
+      Leafish: 'minimal',
+      Onyx: 'classic',
+      Pikachu: 'sidebar',
+      Rhyhorn: 'classic',
+    };
+
+    const variant = TEMPLATE_LAYOUTS[selectedTemplate] || 'classic';
+
+    const templateVisuals = {
+      classic: {
+        headerAlign: 'text-center',
+        titleClass: 'text-3xl font-extrabold uppercase tracking-tight text-[#1a1a1a] mb-1',
+        headingClass: 'text-xs font-bold uppercase tracking-[0.2em] border-b border-gray-300 pb-2 mb-4',
+        chipClass: 'bg-gray-100 text-[#1a1a1a] text-[10px] font-bold px-2 py-1 rounded',
+      },
+      minimal: {
+        headerAlign: 'text-left',
+        titleClass: 'text-[34px] font-light tracking-wide text-[#111827] mb-1',
+        headingClass: 'text-[11px] font-semibold uppercase tracking-[0.25em] pb-1 mb-3 border-b border-gray-200',
+        chipClass: 'bg-transparent border border-gray-300 text-[#1a1a1a] text-[10px] font-semibold px-2 py-1 rounded',
+      },
+      sidebar: {
+        headerAlign: 'text-left',
+        titleClass: 'text-[30px] font-black uppercase tracking-[0.08em] text-[#111827] mb-1',
+        headingClass: 'text-[11px] font-extrabold uppercase tracking-[0.3em] pb-1 mb-3 border-b border-gray-300',
+        chipClass: 'bg-black/5 text-[#1a1a1a] text-[10px] font-bold px-2 py-1 rounded',
+      },
+    };
+
+    const visuals = templateVisuals[variant];
+
+    const SectionTitle = ({ children }) => (
+      <h3 className={visuals.headingClass} style={{ color: settings.primaryColor }}>
+        {children}
+      </h3>
+    );
+
+    const renderExperience = () => resume.experience.length > 0 && (
+      <section>
+        <SectionTitle>Experience</SectionTitle>
+        <div className="flex flex-col gap-4">
+          {resume.experience.map(exp => (
+            <div key={exp._id}>
+              <div className="flex justify-between items-baseline mb-0.5">
+                <h4 className="font-bold text-[14px] text-[#1a1a1a]">{exp.company}</h4>
+                <span className="text-[11px] font-medium text-gray-500 whitespace-nowrap ml-2">
+                  {[exp.startDate, exp.endDate].filter(Boolean).join(' — ')}
+                </span>
+              </div>
+              <p className="text-[13px] font-semibold italic mb-1" style={{ color: settings.primaryColor }}>{exp.position}</p>
+              {exp.location && <p className="text-[11px] text-gray-500 mb-1">{exp.location}</p>}
+              {exp.summary && <p className="text-[12px] text-gray-700 leading-relaxed whitespace-pre-wrap">{exp.summary}</p>}
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+
+    const renderEducation = () => resume.education.length > 0 && (
+      <section>
+        <SectionTitle>Education</SectionTitle>
+        <div className="flex flex-col gap-3">
+          {resume.education.map(edu => (
+            <div key={edu._id}>
+              <h4 className="font-bold text-[13px] text-[#1a1a1a] leading-tight">{edu.studyType}</h4>
+              <p className="text-[12px] font-medium text-gray-600">{edu.institution}</p>
+              <div className="text-[11px] text-gray-500 mt-1 flex justify-between">
+                <span>{[edu.startDate, edu.endDate].filter(Boolean).join(' — ')}</span>
+                {edu.score && <span className="font-bold" style={{ color: settings.primaryColor }}>{edu.score}</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+
+    const renderSkills = () => resume.skills.length > 0 && (
+      <section>
+        <SectionTitle>Skills</SectionTitle>
+        <div className="flex flex-col gap-2">
+          {resume.skills.map(s => (
+            <div key={s._id}>
+              <div className="flex justify-between items-center">
+                <span className="text-[12px] font-bold text-[#1a1a1a]">{s.name}</span>
+                {s.level && <span className="text-[10px] text-gray-500">{s.level}</span>}
+              </div>
+              {s.keywords && <p className="text-[10px] text-gray-500 mt-0.5">{s.keywords}</p>}
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+
+    const renderContactStrip = () => (
+      <div className={`flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-medium text-gray-500 ${variant === 'classic' ? 'justify-center' : ''}`}>
+        {b.email && <span>{b.email}</span>}
+        {b.phone && <span>• {b.phone}</span>}
+        {b.location && <span>• {b.location}</span>}
+        {b.website && <span>• {b.website}</span>}
+      </div>
+    );
 
     return (
       <div
@@ -912,8 +1052,6 @@ export default function ResumeBuilder() {
         }}
       >
         <div style={{ padding: `${settings.pageMargin}px` }}>
-
-          {/* Header */}
           <header className="mb-6 pb-4" style={{ borderBottom: `3px solid ${settings.primaryColor}` }}>
             <div className="flex items-start gap-4">
               {resume.picture.url && (
@@ -928,220 +1066,118 @@ export default function ResumeBuilder() {
                   }}
                 />
               )}
-              <div className="flex-1 text-center">
-                <h1 className="text-3xl font-extrabold uppercase tracking-tight text-[#1a1a1a] mb-1">
-                  {fullName || 'Your Name'}
-                </h1>
+              <div className={`flex-1 ${visuals.headerAlign}`}>
+                <h1 className={visuals.titleClass}>{fullName || 'Your Name'}</h1>
                 {b.headline && (
                   <h2 className="text-base font-medium uppercase tracking-[0.2em] mb-3" style={{ color: settings.primaryColor }}>
                     {b.headline}
                   </h2>
                 )}
-                <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px] font-medium text-gray-500">
-                  {b.email && <span>{b.email}</span>}
-                  {b.phone && <span>• {b.phone}</span>}
-                  {b.location && <span>• {b.location}</span>}
-                  {b.website && <span>• {b.website}</span>}
-                </div>
+                {renderContactStrip()}
               </div>
             </div>
             {b.summary && (
-              <p className="mt-4 text-[13px] text-gray-600 leading-relaxed">{b.summary}</p>
+              <p className={`mt-4 text-[13px] text-gray-600 leading-relaxed ${variant === 'minimal' ? 'max-w-[90%]' : ''}`}>
+                {b.summary}
+              </p>
             )}
           </header>
 
-          {/* Two Column Body */}
-          <div className="flex gap-8">
-            {/* Left Column 65% */}
-            <div className="w-[65%] flex flex-col gap-6">
-
-              {/* Experience */}
-              {resume.experience.length > 0 && (
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] border-b border-gray-300 pb-2 mb-4" style={{ color: settings.primaryColor }}>Experience</h3>
-                  <div className="flex flex-col gap-5">
-                    {resume.experience.map(exp => (
-                      <div key={exp._id}>
-                        <div className="flex justify-between items-baseline mb-0.5">
-                          <h4 className="font-bold text-[14px] text-[#1a1a1a]">{exp.company}</h4>
-                          <span className="text-[11px] font-medium text-gray-500 whitespace-nowrap ml-2">
-                            {[exp.startDate, exp.endDate].filter(Boolean).join(' — ')}
-                          </span>
-                        </div>
-                        <p className="text-[13px] font-semibold italic mb-1" style={{ color: settings.primaryColor }}>{exp.position}</p>
-                        {exp.location && <p className="text-[11px] text-gray-500 mb-1">{exp.location}</p>}
-                        {exp.summary && <p className="text-[12px] text-gray-700 leading-relaxed whitespace-pre-wrap">{exp.summary}</p>}
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Volunteer */}
-              {resume.volunteer.length > 0 && (
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] border-b border-gray-300 pb-2 mb-4" style={{ color: settings.primaryColor }}>Volunteer</h3>
-                  <div className="flex flex-col gap-4">
-                    {resume.volunteer.map(v => (
-                      <div key={v._id}>
-                        <h4 className="font-bold text-[14px] text-[#1a1a1a]">{v.organization}</h4>
-                        <p className="text-[13px] font-semibold italic" style={{ color: settings.primaryColor }}>{v.position}</p>
-                        <span className="text-[11px] text-gray-500">{[v.startDate, v.endDate].filter(Boolean).join(' — ')}</span>
-                        {v.summary && <p className="text-[12px] text-gray-700 leading-relaxed mt-1 whitespace-pre-wrap">{v.summary}</p>}
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Publications */}
-              {resume.publications.length > 0 && (
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] border-b border-gray-300 pb-2 mb-4" style={{ color: settings.primaryColor }}>Publications</h3>
-                  <div className="flex flex-col gap-3">
-                    {resume.publications.map(p => (
-                      <div key={p._id}>
-                        <h4 className="font-bold text-[14px] text-[#1a1a1a]">{p.name}</h4>
-                        <p className="text-[12px] text-gray-600">{p.publisher} {p.date && `• ${p.date}`}</p>
-                        {p.summary && <p className="text-[12px] text-gray-700 mt-1">{p.summary}</p>}
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
+          {variant === 'minimal' && (
+            <div className="flex flex-col gap-5">
+              {renderExperience()}
+              {renderEducation()}
+              {renderSkills()}
             </div>
+          )}
 
-            {/* Right Column 35% */}
-            <div className="w-[35%] flex flex-col gap-6">
-
-              {/* Education */}
-              {resume.education.length > 0 && (
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] border-b border-gray-300 pb-2 mb-4" style={{ color: settings.primaryColor }}>Education</h3>
-                  <div className="flex flex-col gap-4">
-                    {resume.education.map(edu => (
-                      <div key={edu._id}>
-                        <h4 className="font-bold text-[13px] text-[#1a1a1a] leading-tight">{edu.studyType}</h4>
-                        <p className="text-[12px] font-medium text-gray-600">{edu.institution}</p>
-                        <div className="text-[11px] text-gray-500 mt-1 flex justify-between">
-                          <span>{[edu.startDate, edu.endDate].filter(Boolean).join(' — ')}</span>
-                          {edu.score && <span className="font-bold" style={{ color: settings.primaryColor }}>{edu.score}</span>}
+          {variant === 'classic' && (
+            <div className="flex gap-8">
+              <div className="w-[65%] flex flex-col gap-6">
+                {renderExperience()}
+                {resume.volunteer.length > 0 && (
+                  <section>
+                    <SectionTitle>Volunteer</SectionTitle>
+                    <div className="flex flex-col gap-3">
+                      {resume.volunteer.map(v => (
+                        <div key={v._id}>
+                          <h4 className="font-bold text-[14px] text-[#1a1a1a]">{v.organization}</h4>
+                          <p className="text-[13px] font-semibold italic" style={{ color: settings.primaryColor }}>{v.position}</p>
+                          <span className="text-[11px] text-gray-500">{[v.startDate, v.endDate].filter(Boolean).join(' — ')}</span>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </div>
 
-              {/* Skills */}
-              {resume.skills.length > 0 && (
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] border-b border-gray-300 pb-2 mb-4" style={{ color: settings.primaryColor }}>Skills</h3>
-                  <div className="flex flex-col gap-2">
-                    {resume.skills.map(s => (
-                      <div key={s._id}>
-                        <div className="flex justify-between items-center">
-                          <span className="text-[12px] font-bold text-[#1a1a1a]">{s.name}</span>
-                          {s.level && <span className="text-[10px] text-gray-500">{s.level}</span>}
-                        </div>
-                        {s.keywords && <p className="text-[10px] text-gray-500 mt-0.5">{s.keywords}</p>}
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Languages */}
-              {resume.languages.length > 0 && (
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] border-b border-gray-300 pb-2 mb-4" style={{ color: settings.primaryColor }}>Languages</h3>
-                  <div className="flex flex-col gap-1">
-                    {resume.languages.map(l => (
-                      <div key={l._id} className="flex justify-between text-[12px]">
-                        <span className="font-semibold text-[#1a1a1a]">{l.language}</span>
-                        <span className="text-gray-500">{l.fluency}</span>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Interests */}
-              {resume.interests.length > 0 && (
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] border-b border-gray-300 pb-2 mb-4" style={{ color: settings.primaryColor }}>Interests</h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {resume.interests.map(i => (
-                      <span key={i._id} className="bg-gray-100 text-[#1a1a1a] text-[10px] font-bold px-2 py-1 rounded">{i.name}</span>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Awards */}
-              {resume.awards.length > 0 && (
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] border-b border-gray-300 pb-2 mb-4" style={{ color: settings.primaryColor }}>Awards</h3>
-                  <div className="flex flex-col gap-3">
-                    {resume.awards.map(a => (
-                      <div key={a._id}>
-                        <h4 className="font-bold text-[12px] text-[#1a1a1a]">{a.title}</h4>
-                        <p className="text-[11px] text-gray-500">{a.awarder} {a.date && `• ${a.date}`}</p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Certifications */}
-              {resume.certifications.length > 0 && (
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] border-b border-gray-300 pb-2 mb-4" style={{ color: settings.primaryColor }}>Certifications</h3>
-                  <div className="flex flex-col gap-2">
-                    {resume.certifications.map(c => (
-                      <div key={c._id}>
-                        <h4 className="font-bold text-[12px] text-[#1a1a1a]">{c.name}</h4>
-                        <p className="text-[11px] text-gray-500">{c.issuer} {c.date && `• ${c.date}`}</p>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* References */}
-              {resume.references.length > 0 && (
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] border-b border-gray-300 pb-2 mb-4" style={{ color: settings.primaryColor }}>References</h3>
-                  <div className="flex flex-col gap-3">
-                    {resume.references.map(r => (
-                      <div key={r._id}>
-                        <h4 className="font-bold text-[12px] text-[#1a1a1a]">{r.name}</h4>
-                        <p className="text-[11px] text-gray-500">{r.relationship}</p>
-                        {r.phone && <p className="text-[11px] text-gray-500">{r.phone}</p>}
-                        {r.email && <p className="text-[11px] text-gray-500">{r.email}</p>}
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Profiles */}
-              {resume.profiles.length > 0 && (
-                <section>
-                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] border-b border-gray-300 pb-2 mb-4" style={{ color: settings.primaryColor }}>Profiles</h3>
-                  <div className="flex flex-col gap-1">
-                    {resume.profiles.map(p => (
-                      <div key={p._id} className="text-[12px]">
-
-                        <span className="font-semibold text-[#1a1a1a]">{p.network}: </span>
-                        <span className="text-gray-600">{p.username}</span>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
+              <div className="w-[35%] flex flex-col gap-6">
+                {renderEducation()}
+                {renderSkills()}
+                {resume.interests.length > 0 && (
+                  <section>
+                    <SectionTitle>Interests</SectionTitle>
+                    <div className="flex flex-wrap gap-1.5">
+                      {resume.interests.map(i => (
+                        <span key={i._id} className={visuals.chipClass}>{i.name}</span>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </div>
             </div>
-          </div>
+          )}
+
+          {variant === 'sidebar' && (
+            <div className="flex gap-6">
+              <aside className="w-[30%] border-r border-gray-200 pr-4 flex flex-col gap-5">
+                {renderSkills()}
+                {resume.languages.length > 0 && (
+                  <section>
+                    <SectionTitle>Languages</SectionTitle>
+                    <div className="flex flex-col gap-1">
+                      {resume.languages.map(l => (
+                        <div key={l._id} className="flex justify-between text-[12px]">
+                          <span className="font-semibold text-[#1a1a1a]">{l.language}</span>
+                          <span className="text-gray-500">{l.fluency}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+                {resume.profiles.length > 0 && (
+                  <section>
+                    <SectionTitle>Profiles</SectionTitle>
+                    <div className="flex flex-col gap-1">
+                      {resume.profiles.map(p => (
+                        <p key={p._id} className="text-[12px] text-gray-700">
+                          <span className="font-semibold">{p.network}:</span> {p.username}
+                        </p>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </aside>
+
+              <div className="w-[70%] flex flex-col gap-6">
+                {renderExperience()}
+                {renderEducation()}
+                {resume.awards.length > 0 && (
+                  <section>
+                    <SectionTitle>Awards</SectionTitle>
+                    <div className="flex flex-col gap-2">
+                      {resume.awards.map(a => (
+                        <div key={a._id}>
+                          <h4 className="font-bold text-[12px] text-[#1a1a1a]">{a.title}</h4>
+                          <p className="text-[11px] text-gray-500">{a.awarder} {a.date && `• ${a.date}`}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -1172,7 +1208,7 @@ export default function ResumeBuilder() {
           <div className="flex items-center gap-2 overflow-hidden">
             <span className="text-[10px] uppercase tracking-wider font-bold text-text-muted whitespace-nowrap">Dashboard /</span>
             <span className="text-sm font-bold text-text-main truncate max-w-[200px]">
-              {resume.basics.firstName ? `${resume.basics.firstName} ${resume.basics.lastName}` : 'Untitled Resume'}
+              {resumeTitle}
             </span>
           </div>
         </div>

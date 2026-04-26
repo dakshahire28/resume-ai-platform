@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Plus, MoreVertical, FileText, Download, Copy, Trash2, ExternalLink, LayoutDashboard, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import CreateResumeModal from '../components/CreateResumeModal';
 
 export default function MyResumes() {
   const navigate = useNavigate();
   const [resumes, setResumes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     fetchResumes();
@@ -57,7 +59,7 @@ export default function MyResumes() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {/* Create New Card */}
         <div 
-          onClick={() => navigate('/builder')}
+          onClick={() => setIsModalOpen(true)}
           className="group border-2 border-dashed border-border rounded-2xl flex flex-col items-center justify-center p-8 hover:border-primary/50 hover:bg-surface/50 transition-all cursor-pointer h-[340px] shadow-xl shadow-black/5"
         >
           <div className="w-16 h-16 rounded-full bg-surface text-text-muted flex items-center justify-center mb-6 border border-border group-hover:scale-110 group-hover:text-primary group-hover:border-primary/20 transition-all">
@@ -135,6 +137,11 @@ export default function MyResumes() {
            </div>
         )}
       </div>
+
+      <CreateResumeModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </div>
   );
 }

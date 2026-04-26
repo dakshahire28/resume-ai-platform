@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Plus, 
@@ -9,6 +9,7 @@ import {
   ChevronRight,
   LayoutDashboard
 } from 'lucide-react';
+import CreateResumeModal from '../components/CreateResumeModal';
 
 const FEATURE_CARDS = [
   {
@@ -41,6 +42,7 @@ const RECENT_RESUMES = [
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const firstName = 'there';
 
@@ -56,7 +58,7 @@ export default function Dashboard() {
           <p className="text-text-secondary text-sm font-medium">What would you like to build today?</p>
         </div>
         <button 
-          onClick={() => navigate('/builder')}
+          onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-xl font-bold transition-all active:scale-95 whitespace-nowrap shadow-lg shadow-primary/10"
         >
           <Plus size={18} strokeWidth={3} />
@@ -134,6 +136,11 @@ export default function Dashboard() {
           ))}
         </div>
       </section>
+
+      <CreateResumeModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </div>
   );
 }
