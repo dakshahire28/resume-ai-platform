@@ -272,17 +272,17 @@ export default function ResumeAnalyzer() {
                   </div>
                 </div>
 
-                <div className="w-full flex justify-between gap-3 mt-auto">
-                  <div className="flex-1 text-center bg-background border border-border rounded-xl p-3">
-                    <p className="text-[11px] font-bold text-text-secondary uppercase mb-1">Impact</p>
+                <div className="w-full flex flex-col gap-3 mt-4">
+                  <div className="w-full flex items-center justify-between bg-background border border-border rounded-xl p-3">
+                    <p className="text-[11px] font-bold text-text-secondary uppercase">Impact</p>
                     <p className="text-lg font-black">{results.subScores?.impact}%</p>
                   </div>
-                  <div className="flex-1 text-center bg-background border border-border rounded-xl p-3">
-                    <p className="text-[11px] font-bold text-text-secondary uppercase mb-1">Brevity</p>
+                  <div className="w-full flex items-center justify-between bg-background border border-border rounded-xl p-3">
+                    <p className="text-[11px] font-bold text-text-secondary uppercase">Brevity</p>
                     <p className="text-lg font-black">{results.subScores?.brevity}%</p>
                   </div>
-                  <div className="flex-1 text-center bg-background border border-border rounded-xl p-3">
-                    <p className="text-[11px] font-bold text-text-secondary uppercase mb-1">Keywords</p>
+                  <div className="w-full flex items-center justify-between bg-background border border-border rounded-xl p-3">
+                    <p className="text-[11px] font-bold text-text-secondary uppercase">Keywords</p>
                     <p className="text-lg font-black">{results.subScores?.keywords}%</p>
                   </div>
                 </div>
