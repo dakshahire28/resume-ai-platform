@@ -12,6 +12,16 @@ import {
   Home
 } from 'lucide-react';
 
+import Minimalist from '../components/templates/Minimalist';
+import Modern from '../components/templates/Modern';
+import Creative from '../components/templates/Creative';
+import Professional from '../components/templates/Professional';
+import Executive from '../components/templates/Executive';
+import Academic from '../components/templates/Academic';
+import Infographic from '../components/templates/Infographic';
+import Elegant from '../components/templates/Elegant';
+import TechStartup from '../components/templates/TechStartup';
+
 /* ─────────── LEFT NAVIGATION SECTIONS (matches RxResu) ─────────── */
 const SECTIONS = [
   { id: 'picture', label: 'Picture', icon: ImageIcon },
@@ -44,28 +54,15 @@ const SETTINGS_TABS = [
 
 /* ─────────── TEMPLATES ─────────── */
 const TEMPLATES = [
-  'Software Engineer', 
-  'Data Scientist', 
-  'Marketing Manager', 
-  'Creative Director', 
-  'Sales Executive', 
-  'Project Manager', 
-  'Academic Researcher', 
-  'Executive Leadership', 
-  'General Professional',
-  'Azurill',
-  'Bronzor',
-  'Chikorita',
-  'Ditgar',
-  'Ditto',
-  'Gengar',
-  'Glalie',
-  'Kakuna',
-  'Lapras',
-  'Leafish',
-  'Onyx',
-  'Pikachu',
-  'Rhyhorn'
+  'Minimalist',
+  'Modern',
+  'Creative',
+  'Professional',
+  'Executive',
+  'Academic',
+  'Infographic',
+  'Elegant',
+  'Tech Startup'
 ];
 
 const FONT_FAMILIES = [
@@ -367,56 +364,36 @@ export default function ResumeBuilder() {
     }
   };
 
-  /* ── Export PDF (High Quality) ── */
+  /* ── Export PDF (High Quality using html2pdf) ── */
   const handleExportPDF = async () => {
-    if (!resumeId) {
-      alert('Please save your resume first before exporting a high-quality PDF.');
-      return;
-    }
-
     setSaving(true);
     try {
       const element = document.getElementById('resume-preview');
-      const html = element.innerHTML;
+      if (!element) throw new Error("Resume preview element not found");
+
+      // Temporarily remove transform scaling so html2pdf captures at 100% scale
+      const originalTransform = element.style.transform;
+      element.style.transform = 'scale(1)';
+
+      const opt = {
+        margin:       0,
+        filename:     `resume_${resume.basics.firstName || 'data'}.pdf`,
+        image:        { type: 'jpeg', quality: 1 },
+        html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      if (window.html2pdf) {
+        await window.html2pdf().set(opt).from(element).save();
+      } else {
+        throw new Error("html2pdf library not loaded");
+      }
       
-      // We wrap it in a basic HTML structure with A4 styles
-      const fullHtml = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="utf-8">
-            <script src="https://cdn.tailwindcss.com"></script>
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Roboto:wght@400;500;700&family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-            <style>
-              body { margin: 0; padding: 0; background: white; -webkit-print-color-adjust: exact; }
-              #resume-preview { 
-                width: 210mm !important; 
-                height: 297mm !important; 
-                padding: ${settings.pageMargin}mm !important;
-                font-family: "${settings.font}", sans-serif !important;
-              }
-            </style>
-          </head>
-          <body>
-            <div id="resume-preview">${html}</div>
-          </body>
-        </html>
-      `;
-
-      const res = await axios.post(`http://localhost:5000/api/resumes/${resumeId}/export/pdf`, { html: fullHtml }, { 
-        responseType: 'blob',
-        withCredentials: true 
-      });
-
-      const url = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `resume_${resume.basics.firstName || 'data'}.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
+      // Restore the user's zoom scale
+      element.style.transform = originalTransform;
     } catch (err) {
-      console.error('High-quality PDF export failed, falling back to print:', err);
+      console.error('PDF export failed:', err);
+      // Fallback to native print if html2pdf fails
       window.print();
     } finally {
       setSaving(false);
@@ -911,274 +888,35 @@ export default function ResumeBuilder() {
      LIVE A4 PREVIEW
      ═══════════════════════════════════════════════════════════ */
   const ResumePreview = () => {
-    const b = resume.basics;
-    const fullName = `${b.firstName} ${b.lastName}`.trim();
-    const selectedTemplate = settings.template || 'Software Engineer';
+    const selectedTemplate = settings.template || 'Minimalist';
 
-    const TEMPLATE_LAYOUTS = {
-      'Software Engineer': 'classic',
-      'Data Scientist': 'classic',
-      'Marketing Manager': 'minimal',
-      'Creative Director': 'sidebar',
-      'Sales Executive': 'minimal',
-      'Project Manager': 'classic',
-      'Academic Researcher': 'classic',
-      'Executive Leadership': 'sidebar',
-      'General Professional': 'classic',
-      Azurill: 'minimal',
-      Bronzor: 'classic',
-      Chikorita: 'sidebar',
-      Ditgar: 'classic',
-      Ditto: 'minimal',
-      Gengar: 'sidebar',
-      Glalie: 'classic',
-      Kakuna: 'minimal',
-      Lapras: 'sidebar',
-      Leafish: 'minimal',
-      Onyx: 'classic',
-      Pikachu: 'sidebar',
-      Rhyhorn: 'classic',
+    const TEMPLATE_COMPONENTS = {
+      'Minimalist': Minimalist,
+      'Modern': Modern,
+      'Creative': Creative,
+      'Professional': Professional,
+      'Executive': Executive,
+      'Academic': Academic,
+      'Infographic': Infographic,
+      'Elegant': Elegant,
+      'Tech Startup': TechStartup,
     };
 
-    const variant = TEMPLATE_LAYOUTS[selectedTemplate] || 'classic';
-
-    const templateVisuals = {
-      classic: {
-        headerAlign: 'text-center',
-        titleClass: 'text-3xl font-extrabold uppercase tracking-tight text-[#1a1a1a] mb-1',
-        headingClass: 'text-xs font-bold uppercase tracking-[0.2em] border-b border-gray-300 pb-2 mb-4',
-        chipClass: 'bg-gray-100 text-[#1a1a1a] text-[10px] font-bold px-2 py-1 rounded',
-      },
-      minimal: {
-        headerAlign: 'text-left',
-        titleClass: 'text-[34px] font-light tracking-wide text-[#111827] mb-1',
-        headingClass: 'text-[11px] font-semibold uppercase tracking-[0.25em] pb-1 mb-3 border-b border-gray-200',
-        chipClass: 'bg-transparent border border-gray-300 text-[#1a1a1a] text-[10px] font-semibold px-2 py-1 rounded',
-      },
-      sidebar: {
-        headerAlign: 'text-left',
-        titleClass: 'text-[30px] font-black uppercase tracking-[0.08em] text-[#111827] mb-1',
-        headingClass: 'text-[11px] font-extrabold uppercase tracking-[0.3em] pb-1 mb-3 border-b border-gray-300',
-        chipClass: 'bg-black/5 text-[#1a1a1a] text-[10px] font-bold px-2 py-1 rounded',
-      },
-    };
-
-    const visuals = templateVisuals[variant];
-
-    const SectionTitle = ({ children }) => (
-      <h3 className={visuals.headingClass} style={{ color: settings.primaryColor }}>
-        {children}
-      </h3>
-    );
-
-    const renderExperience = () => resume.experience.length > 0 && (
-      <section>
-        <SectionTitle>Experience</SectionTitle>
-        <div className="flex flex-col gap-4">
-          {resume.experience.map(exp => (
-            <div key={exp._id}>
-              <div className="flex justify-between items-baseline mb-0.5">
-                <h4 className="font-bold text-[14px] text-[#1a1a1a]">{exp.company}</h4>
-                <span className="text-[11px] font-medium text-gray-500 whitespace-nowrap ml-2">
-                  {[exp.startDate, exp.endDate].filter(Boolean).join(' — ')}
-                </span>
-              </div>
-              <p className="text-[13px] font-semibold italic mb-1" style={{ color: settings.primaryColor }}>{exp.position}</p>
-              {exp.location && <p className="text-[11px] text-gray-500 mb-1">{exp.location}</p>}
-              {exp.summary && <p className="text-[12px] text-gray-700 leading-relaxed whitespace-pre-wrap">{exp.summary}</p>}
-            </div>
-          ))}
-        </div>
-      </section>
-    );
-
-    const renderEducation = () => resume.education.length > 0 && (
-      <section>
-        <SectionTitle>Education</SectionTitle>
-        <div className="flex flex-col gap-3">
-          {resume.education.map(edu => (
-            <div key={edu._id}>
-              <h4 className="font-bold text-[13px] text-[#1a1a1a] leading-tight">{edu.studyType}</h4>
-              <p className="text-[12px] font-medium text-gray-600">{edu.institution}</p>
-              <div className="text-[11px] text-gray-500 mt-1 flex justify-between">
-                <span>{[edu.startDate, edu.endDate].filter(Boolean).join(' — ')}</span>
-                {edu.score && <span className="font-bold" style={{ color: settings.primaryColor }}>{edu.score}</span>}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-    );
-
-    const renderSkills = () => resume.skills.length > 0 && (
-      <section>
-        <SectionTitle>Skills</SectionTitle>
-        <div className="flex flex-col gap-2">
-          {resume.skills.map(s => (
-            <div key={s._id}>
-              <div className="flex justify-between items-center">
-                <span className="text-[12px] font-bold text-[#1a1a1a]">{s.name}</span>
-                {s.level && <span className="text-[10px] text-gray-500">{s.level}</span>}
-              </div>
-              {s.keywords && <p className="text-[10px] text-gray-500 mt-0.5">{s.keywords}</p>}
-            </div>
-          ))}
-        </div>
-      </section>
-    );
-
-    const renderContactStrip = () => (
-      <div className={`flex flex-wrap gap-x-4 gap-y-1 text-[11px] font-medium text-gray-500 ${variant === 'classic' ? 'justify-center' : ''}`}>
-        {b.email && <span>{b.email}</span>}
-        {b.phone && <span>• {b.phone}</span>}
-        {b.location && <span>• {b.location}</span>}
-        {b.website && <span>• {b.website}</span>}
-      </div>
-    );
+    // Fallback to Minimalist if template is not found (e.g. if the user had 'Software Engineer' saved)
+    const TemplateComponent = TEMPLATE_COMPONENTS[selectedTemplate] || Minimalist;
 
     return (
       <div
+        id="resume-preview"
         ref={previewRef}
-        className="bg-white shadow-2xl transition-transform duration-300 ease-out origin-top shrink-0"
+        className="bg-white shadow-2xl transition-transform duration-300 ease-out origin-top shrink-0 print:shadow-none print:transform-none"
         style={{
           width: '794px',
           minHeight: '1123px',
           transform: `scale(${zoom / 100})`,
-          fontFamily: `'${settings.font}', sans-serif`,
-          fontSize: `${settings.fontSize}px`,
-          lineHeight: settings.lineHeight,
-          backgroundColor: settings.bgColor,
-          color: '#1a1a1a',
         }}
       >
-        <div style={{ padding: `${settings.pageMargin}px` }}>
-          <header className="mb-6 pb-4" style={{ borderBottom: `3px solid ${settings.primaryColor}` }}>
-            <div className="flex items-start gap-4">
-              {resume.picture.url && (
-                <img
-                  src={resume.picture.url}
-                  alt="Profile"
-                  style={{
-                    width: resume.picture.size,
-                    height: resume.picture.size,
-                    borderRadius: resume.picture.borderRadius,
-                    objectFit: 'cover',
-                  }}
-                />
-              )}
-              <div className={`flex-1 ${visuals.headerAlign}`}>
-                <h1 className={visuals.titleClass}>{fullName || 'Your Name'}</h1>
-                {b.headline && (
-                  <h2 className="text-base font-medium uppercase tracking-[0.2em] mb-3" style={{ color: settings.primaryColor }}>
-                    {b.headline}
-                  </h2>
-                )}
-                {renderContactStrip()}
-              </div>
-            </div>
-            {b.summary && (
-              <p className={`mt-4 text-[13px] text-gray-600 leading-relaxed ${variant === 'minimal' ? 'max-w-[90%]' : ''}`}>
-                {b.summary}
-              </p>
-            )}
-          </header>
-
-          {variant === 'minimal' && (
-            <div className="flex flex-col gap-5">
-              {renderExperience()}
-              {renderEducation()}
-              {renderSkills()}
-            </div>
-          )}
-
-          {variant === 'classic' && (
-            <div className="flex gap-8">
-              <div className="w-[65%] flex flex-col gap-6">
-                {renderExperience()}
-                {resume.volunteer.length > 0 && (
-                  <section>
-                    <SectionTitle>Volunteer</SectionTitle>
-                    <div className="flex flex-col gap-3">
-                      {resume.volunteer.map(v => (
-                        <div key={v._id}>
-                          <h4 className="font-bold text-[14px] text-[#1a1a1a]">{v.organization}</h4>
-                          <p className="text-[13px] font-semibold italic" style={{ color: settings.primaryColor }}>{v.position}</p>
-                          <span className="text-[11px] text-gray-500">{[v.startDate, v.endDate].filter(Boolean).join(' — ')}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </div>
-
-              <div className="w-[35%] flex flex-col gap-6">
-                {renderEducation()}
-                {renderSkills()}
-                {resume.interests.length > 0 && (
-                  <section>
-                    <SectionTitle>Interests</SectionTitle>
-                    <div className="flex flex-wrap gap-1.5">
-                      {resume.interests.map(i => (
-                        <span key={i._id} className={visuals.chipClass}>{i.name}</span>
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </div>
-            </div>
-          )}
-
-          {variant === 'sidebar' && (
-            <div className="flex gap-6">
-              <aside className="w-[30%] border-r border-gray-200 pr-4 flex flex-col gap-5">
-                {renderSkills()}
-                {resume.languages.length > 0 && (
-                  <section>
-                    <SectionTitle>Languages</SectionTitle>
-                    <div className="flex flex-col gap-1">
-                      {resume.languages.map(l => (
-                        <div key={l._id} className="flex justify-between text-[12px]">
-                          <span className="font-semibold text-[#1a1a1a]">{l.language}</span>
-                          <span className="text-gray-500">{l.fluency}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-                {resume.profiles.length > 0 && (
-                  <section>
-                    <SectionTitle>Profiles</SectionTitle>
-                    <div className="flex flex-col gap-1">
-                      {resume.profiles.map(p => (
-                        <p key={p._id} className="text-[12px] text-gray-700">
-                          <span className="font-semibold">{p.network}:</span> {p.username}
-                        </p>
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </aside>
-
-              <div className="w-[70%] flex flex-col gap-6">
-                {renderExperience()}
-                {renderEducation()}
-                {resume.awards.length > 0 && (
-                  <section>
-                    <SectionTitle>Awards</SectionTitle>
-                    <div className="flex flex-col gap-2">
-                      {resume.awards.map(a => (
-                        <div key={a._id}>
-                          <h4 className="font-bold text-[12px] text-[#1a1a1a]">{a.title}</h4>
-                          <p className="text-[11px] text-gray-500">{a.awarder} {a.date && `• ${a.date}`}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+        <TemplateComponent resume={resume} settings={settings} />
       </div>
     );
   };
@@ -1190,10 +928,10 @@ export default function ResumeBuilder() {
   const settingsLabel = SETTINGS_TABS.find(s => s.id === activeSettingsTab)?.label || '';
 
   return (
-    <div className={`fixed inset-0 flex flex-col z-[100] transition-colors duration-300 ${isDark ? 'bg-[#0f1115] text-[#e2e8f0]' : 'bg-[#f8fafc] text-[#0f172a]'}`}>
+    <div className={`fixed inset-0 flex flex-col z-[100] transition-colors duration-300 ${isDark ? 'bg-[#0f1115] text-[#e2e8f0]' : 'bg-[#f8fafc] text-[#0f172a]'} print:bg-white print:text-black`}>
       
       {/* ── Top Bar ── */}
-      <header className={`h-12 border-b border-border/50 flex items-center justify-between px-4 z-[110] transition-colors ${isDark ? 'bg-[#0f1115]/80 backdrop-blur-md' : 'bg-white/80 backdrop-blur-md'}`}>
+      <header className={`h-12 border-b border-border/50 flex items-center justify-between px-4 z-[110] transition-colors ${isDark ? 'bg-[#0f1115]/80 backdrop-blur-md' : 'bg-white/80 backdrop-blur-md'} print:hidden`}>
         <div className="flex items-center gap-3">
           <button 
             onClick={() => navigate('/dashboard')}
@@ -1243,10 +981,10 @@ export default function ResumeBuilder() {
       </header>
 
       {/* ── Main Area ── */}
-      <div className="flex-1 flex overflow-hidden relative">
+      <div className="flex-1 flex overflow-hidden relative print:overflow-visible print:block">
         
         {/* ── Column 1: Left Icon Nav (56px) ── */}
-        <nav className={`w-14 min-w-[56px] border-r border-border/50 flex flex-col items-center py-4 gap-2 z-50 transition-colors ${isDark ? 'bg-[#161b22]' : 'bg-[#ffffff]'}`}>
+        <nav className={`w-14 min-w-[56px] border-r border-border/50 flex flex-col items-center py-4 gap-2 z-50 transition-colors ${isDark ? 'bg-[#161b22]' : 'bg-[#ffffff]'} print:hidden`}>
           {SECTIONS.map((s) => {
             const Icon = s.icon;
             const isActive = activeSection === s.id && leftPanelOpen;
@@ -1282,7 +1020,7 @@ export default function ResumeBuilder() {
 
         {/* ── Column 2: Editor Panel (420px) ── */}
         <div 
-          className={`transition-all duration-300 ease-in-out border-r border-border/10 overflow-hidden z-40 shadow-2xl ${isDark ? 'bg-[#0f1115]' : 'bg-white'}`}
+          className={`transition-all duration-300 ease-in-out border-r border-border/10 overflow-hidden z-40 shadow-2xl ${isDark ? 'bg-[#0f1115]' : 'bg-white'} print:hidden`}
           style={{ width: leftPanelOpen ? '420px' : '0px' }}
         >
           <div className="w-[420px] h-full flex flex-col">
@@ -1306,15 +1044,15 @@ export default function ResumeBuilder() {
         </div>
 
         {/* ── Column 3: Preview Canvas ── */}
-        <main className={`flex-1 overflow-auto flex items-start justify-center p-12 relative scroll-smooth transition-colors ${isDark ? 'bg-[#1a1c20]' : 'bg-[#e2e8f0]'}`}>
-          <div className="relative group">
+        <main className={`flex-1 overflow-auto flex items-start justify-center p-12 relative scroll-smooth transition-colors ${isDark ? 'bg-[#1a1c20]' : 'bg-[#e2e8f0]'} print:p-0 print:block print:overflow-visible`}>
+          <div className="relative group print:m-0 print:p-0">
             <ResumePreview />
           </div>
         </main>
 
         {/* ── Column 4: Right Settings Panel (320px) ── */}
         <div 
-          className={`transition-all duration-300 ease-in-out border-l border-border/10 overflow-hidden z-40 shadow-2xl ${isDark ? 'bg-[#0f1115]' : 'bg-white'}`}
+          className={`transition-all duration-300 ease-in-out border-l border-border/10 overflow-hidden z-40 shadow-2xl ${isDark ? 'bg-[#0f1115]' : 'bg-white'} print:hidden`}
           style={{ width: rightPanelOpen ? '320px' : '0px' }}
         >
           <div className="w-[320px] h-full flex flex-col">
@@ -1338,7 +1076,7 @@ export default function ResumeBuilder() {
         </div>
 
         {/* ── Column 5: Right Icon Nav (56px) ── */}
-        <nav className={`w-14 min-w-[56px] border-l border-border/50 flex flex-col items-center py-4 gap-2 z-50 transition-colors ${isDark ? 'bg-[#161b22]' : 'bg-[#ffffff]'}`}>
+        <nav className={`w-14 min-w-[56px] border-l border-border/50 flex flex-col items-center py-4 gap-2 z-50 transition-colors ${isDark ? 'bg-[#161b22]' : 'bg-[#ffffff]'} print:hidden`}>
           {SETTINGS_TABS.map((s) => {
             const Icon = s.icon;
             const isActive = activeSettingsTab === s.id && rightPanelOpen;
@@ -1372,7 +1110,7 @@ export default function ResumeBuilder() {
         </nav>
 
         {/* ── Floating Toolbar ── */}
-        <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1 border border-border rounded-full px-4 py-2 shadow-2xl z-[100] transition-all backdrop-blur-md ${isDark ? 'bg-[#161b22]/90' : 'bg-white/90'}`}>
+        <div className={`absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-1 border border-border rounded-full px-4 py-2 shadow-2xl z-[100] transition-all backdrop-blur-md ${isDark ? 'bg-[#161b22]/90' : 'bg-white/90'} print:hidden`}>
           <button 
             onClick={handleUndo} 
             disabled={historyIndex <= 0}

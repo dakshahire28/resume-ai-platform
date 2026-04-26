@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const resumeController = require('../controllers/resumeController');
+const analyzeController = require('../controllers/analyzeController');
 
+router.post('/analyze', analyzeController.analyzeResume);
 router.post('/', resumeController.createResume);
 router.get('/', resumeController.getResumes);
 router.get('/:id', resumeController.getResumeById);

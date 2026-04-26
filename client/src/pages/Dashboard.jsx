@@ -16,7 +16,7 @@ const FEATURE_CARDS = [
     title: "Resume Builder",
     description: "Design a professional resume with real-time AI assistance.",
     icon: FileText,
-    path: "/builder",
+    path: "/resumes",
     color: "text-indigo-400",
     bg: "bg-indigo-500/10",
     border: "border-indigo-500/20",
