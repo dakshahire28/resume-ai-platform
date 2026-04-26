@@ -1,8 +1,12 @@
 import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import Resources from './pages/Resources';
 import Home from './pages/Home';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 import ResumeBuilder from './pages/ResumeBuilder';
 import ResumeAnalyzer from './pages/ResumeAnalyzer';
 import Roadmaps from './pages/Roadmaps';
@@ -26,20 +30,37 @@ function Layout() {
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/builder" element={<ResumeBuilder />} />
-        <Route element={<Layout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/analyzer" element={<ResumeAnalyzer />} />
-          <Route path="/resumes" element={<MyResumes />} />
-          <Route path="/resources" element={<Resources />} />
-          <Route path="/roadmaps" element={<Roadmaps />} />
-          <Route path="/settings" element={<Settings />} />
-        </Route>
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+
+          {/* Protected: Resume Builder (standalone layout) */}
+          <Route path="/builder" element={
+            <ProtectedRoute>
+              <ResumeBuilder />
+            </ProtectedRoute>
+          } />
+
+          {/* Protected: Dashboard layout routes */}
+          <Route element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/analyzer" element={<ResumeAnalyzer />} />
+            <Route path="/resumes" element={<MyResumes />} />
+            <Route path="/resources" element={<Resources />} />
+            <Route path="/roadmaps" element={<Roadmaps />} />
+            <Route path="/settings" element={<Settings />} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
 

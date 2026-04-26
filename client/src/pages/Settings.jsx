@@ -1,6 +1,9 @@
-import React from 'react';
-import { User, Bell, Shield, Palette, Globe, CreditCard, ChevronRight, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User, Bell, Shield, Palette, Globe, CreditCard, ChevronRight, Check, AlertTriangle, X } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import axios from 'axios';
 
 const THEMES = [
   { id: 'dark', label: 'Dark', color: 'bg-[#09090b]', accent: 'bg-indigo-500' },
@@ -21,6 +24,29 @@ const SECTIONS = [
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+
+  const handleDeleteAccount = async () => {
+    if (confirmText !== 'DELETE') return;
+    setDeleting(true);
+    setDeleteError('');
+
+    try {
+      await axios.delete('/api/auth/delete', { withCredentials: true });
+      await logout();
+      navigate('/');
+    } catch (err) {
+      setDeleteError(err.response?.data?.message || 'Failed to delete account. Please try again.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-10 py-4">
@@ -104,12 +130,88 @@ export default function Settings() {
           <h3 className="text-lg font-bold text-text-main mt-1">Delete Account</h3>
           <p className="text-sm text-text-secondary mt-1">Once you delete your account, there is no going back. Please be certain.</p>
         </div>
-        <button className="relative z-10 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-red-900/20 whitespace-nowrap">
+        <button 
+          onClick={() => setShowDeleteModal(true)}
+          className="relative z-10 bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-red-900/20 whitespace-nowrap"
+        >
           Delete My Account
         </button>
         <div className="absolute top-0 right-0 w-32 h-32 bg-red-600 opacity-[0.03] blur-3xl pointer-events-none"></div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-surface border border-border rounded-2xl p-8 w-full max-w-md shadow-2xl relative animate-in fade-in zoom-in duration-200 mx-4">
+            <button 
+              onClick={() => { setShowDeleteModal(false); setConfirmText(''); setDeleteError(''); }}
+              className="absolute top-4 right-4 text-text-muted hover:text-text-main transition-colors"
+            >
+              <X size={20} />
+            </button>
+
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shrink-0">
+                <AlertTriangle size={24} className="text-red-500" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-text-main">Delete Account</h2>
+                <p className="text-xs text-text-secondary mt-0.5">This action is permanent and irreversible.</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-red-500/5 border border-red-500/10 rounded-xl p-4 space-y-2">
+                <p className="text-sm text-text-secondary">This will permanently delete:</p>
+                <ul className="text-sm text-red-400 space-y-1">
+                  <li className="flex items-center gap-2">• Your profile and account data</li>
+                  <li className="flex items-center gap-2">• All saved resumes</li>
+                  <li className="flex items-center gap-2">• All AI-generated content</li>
+                </ul>
+              </div>
+
+              {deleteError && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl px-4 py-3 text-sm">
+                  {deleteError}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-text-secondary">
+                  Type <span className="font-black text-red-500">DELETE</span> to confirm
+                </label>
+                <input 
+                  type="text"
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder="Type DELETE here"
+                  className="w-full bg-background border border-border rounded-xl px-4 py-3 text-text-main outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/20 transition-all text-sm font-mono"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => { setShowDeleteModal(false); setConfirmText(''); setDeleteError(''); }}
+                  className="flex-1 py-3 bg-surface hover:bg-background border border-border text-text-main rounded-xl text-sm font-bold transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={confirmText !== 'DELETE' || deleting}
+                  className="flex-1 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2"
+                >
+                  {deleting ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    'Delete Forever'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-

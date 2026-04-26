@@ -136,6 +136,7 @@ exports.autoImproveResume = async (req, res) => {
 
     // Create a new clone/import so we don't destroy their original one immediately
     const newResume = new Resume({
+      user: req.user._id,
       title: source === 'saved' ? `(AI Improved) ${baseData.title}` : `Imported Resume`,
       template: source === 'saved' ? baseData.template : 'Modern',
       settings: source === 'saved' ? baseData.settings : undefined,

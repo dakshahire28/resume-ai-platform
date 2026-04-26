@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { 
   Plus, 
   FileText, 
@@ -44,7 +45,8 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const firstName = 'there';
+  const { user } = useAuth();
+  const firstName = user?.name?.split(' ')[0] || 'there';
 
   return (
     <div className="max-w-5xl mx-auto space-y-12 py-4">

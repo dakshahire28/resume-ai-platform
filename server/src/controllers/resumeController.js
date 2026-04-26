@@ -10,7 +10,7 @@ exports.createResume = async (req, res) => {
   try {
     const { title, template, settings, data } = req.body;
     const resume = await Resume.create({
-      user: req.user?.id || null,
+      user: req.user._id,
       title,
       template,
       settings,
@@ -24,7 +24,7 @@ exports.createResume = async (req, res) => {
 
 exports.getResumes = async (req, res) => {
   try {
-    const resumes = await Resume.find().sort({ updatedAt: -1 });
+    const resumes = await Resume.find({ user: req.user._id }).sort({ updatedAt: -1 });
     res.json(resumes);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -33,7 +33,7 @@ exports.getResumes = async (req, res) => {
 
 exports.getResumeById = async (req, res) => {
   try {
-    const resume = await Resume.findById(req.params.id);
+    const resume = await Resume.findOne({ _id: req.params.id, user: req.user._id });
     if (!resume) return res.status(404).json({ message: 'Resume not found' });
     res.json(resume);
   } catch (err) {
@@ -44,8 +44,8 @@ exports.getResumeById = async (req, res) => {
 exports.updateResume = async (req, res) => {
   try {
     const { title, template, settings, data } = req.body;
-    const resume = await Resume.findByIdAndUpdate(
-      req.params.id,
+    const resume = await Resume.findOneAndUpdate(
+      { _id: req.params.id, user: req.user._id },
       { title, template, settings, data },
       { new: true }
     );
@@ -58,7 +58,7 @@ exports.updateResume = async (req, res) => {
 
 exports.deleteResume = async (req, res) => {
   try {
-    const resume = await Resume.findByIdAndDelete(req.params.id);
+    const resume = await Resume.findOneAndDelete({ _id: req.params.id, user: req.user._id });
     if (!resume) return res.status(404).json({ message: 'Resume not found' });
     res.json({ message: 'Resume deleted successfully' });
   } catch (err) {

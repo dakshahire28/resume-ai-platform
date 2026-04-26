@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import Logo from './Logo';
 import {
   LayoutDashboard,
@@ -7,7 +8,8 @@ import {
   BookOpen,
   Map,
   Settings,
-  LogOut
+  LogOut,
+  User
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -22,6 +24,12 @@ const NAV_ITEMS = [
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    navigate('/');
+    await logout();
+  };
 
   return (
     <aside className="w-[260px] min-w-[260px] bg-background h-full border-r border-border flex flex-col z-50 transition-colors duration-300">
@@ -59,16 +67,28 @@ export default function Sidebar() {
           })}
         </div>
 
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary hover:text-red-500 hover:bg-red-500/5 transition-all duration-200 group cursor-pointer mb-2"
-        >
-          <LogOut size={18} strokeWidth={2} className="transition-transform group-hover:scale-110" />
-          <span className="text-sm font-medium">Home</span>
-        </button>
+        {/* User section */}
+        <div className="border-t border-border pt-4 pb-2 space-y-2">
+          {user && (
+            <div className="flex items-center gap-3 px-4 py-2">
+              <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+                <User size={16} strokeWidth={2.5} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-text-main truncate">{user.name}</p>
+                <p className="text-[10px] text-text-muted truncate">{user.email}</p>
+              </div>
+            </div>
+          )}
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-text-secondary hover:text-red-500 hover:bg-red-500/5 transition-all duration-200 group cursor-pointer w-full"
+          >
+            <LogOut size={18} strokeWidth={2} className="transition-transform group-hover:scale-110" />
+            <span className="text-sm font-medium">Logout</span>
+          </button>
+        </div>
       </nav>
     </aside>
   );
 }
-
-

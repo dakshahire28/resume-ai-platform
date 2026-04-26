@@ -3,15 +3,19 @@ const router = express.Router();
 const resumeController = require('../controllers/resumeController');
 const analyzeController = require('../controllers/analyzeController');
 const autoImproveController = require('../controllers/autoImproveController');
+const { protect } = require('../middleware/authMiddleware');
 
-router.post('/auto-improve', autoImproveController.autoImproveResume);
-router.post('/generate-css', autoImproveController.generateCSS);
+// Public AI routes (no auth needed for analyzer)
 router.post('/analyze', analyzeController.analyzeResume);
-router.post('/', resumeController.createResume);
-router.get('/', resumeController.getResumes);
-router.get('/:id', resumeController.getResumeById);
-router.put('/:id', resumeController.updateResume);
-router.delete('/:id', resumeController.deleteResume);
-router.post('/:id/export/pdf', resumeController.exportPDF);
+
+// Protected routes (require login)
+router.post('/auto-improve', protect, autoImproveController.autoImproveResume);
+router.post('/generate-css', protect, autoImproveController.generateCSS);
+router.post('/', protect, resumeController.createResume);
+router.get('/', protect, resumeController.getResumes);
+router.get('/:id', protect, resumeController.getResumeById);
+router.put('/:id', protect, resumeController.updateResume);
+router.delete('/:id', protect, resumeController.deleteResume);
+router.post('/:id/export/pdf', protect, resumeController.exportPDF);
 
 module.exports = router;

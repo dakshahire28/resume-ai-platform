@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const resumeRoutes = require('./routes/resumeRoutes');
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
@@ -16,6 +18,9 @@ app.use(cors({
   credentials: true,
 }));
 
+// Parse cookies
+app.use(cookieParser());
+
 // Parse JSON request bodies with increased limit for PDF text
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -26,6 +31,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/resumes', resumeRoutes);
 
 // 404 handler

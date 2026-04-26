@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, FileText, BookOpen, Activity, Send, Sun, Moon, Map } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import Logo from '../components/Logo';
 import DotGrid from '../components/ui/DotGrid';
 
@@ -25,6 +26,7 @@ const features = [
 
 export default function Home() {
   const { isDark, toggleTheme } = useTheme();
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-background text-text-main selection:bg-primary selection:text-white pb-20 transition-colors duration-300">
@@ -45,11 +47,11 @@ export default function Home() {
           >
             {isDark ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          <Link to="/dashboard" className="px-5 py-2 text-sm font-medium hover:text-primary transition-colors rounded text-text-main border border-border bg-surface shadow-sm">
-            Dashboard
+          <Link to={user ? "/dashboard" : "/login"} className="px-5 py-2 text-sm font-medium hover:text-primary transition-colors rounded text-text-main border border-border bg-surface shadow-sm">
+            {user ? 'Dashboard' : 'Login'}
           </Link>
-          <Link to="/dashboard" className="px-5 py-2 text-sm font-medium bg-primary hover:bg-primary/90 text-white rounded transition-colors hidden sm:block shadow-sm">
-            Get Started
+          <Link to={user ? "/dashboard" : "/signup"} className="px-5 py-2 text-sm font-medium bg-primary hover:bg-primary/90 text-white rounded transition-colors hidden sm:block shadow-sm">
+            {user ? 'Go to Dashboard' : 'Get Started'}
           </Link>
         </div>
       </nav>
