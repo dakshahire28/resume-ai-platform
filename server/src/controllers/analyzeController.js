@@ -1,6 +1,5 @@
-const { GoogleGenAI, Type } = require('@google/genai');
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const { Type } = require('@google/genai');
+const { callGemini, getCleanErrorMessage, isTransientError } = require('../utils/geminiHelper');
 
 exports.analyzeResume = async (req, res) => {
   try {
@@ -28,8 +27,7 @@ exports.analyzeResume = async (req, res) => {
       Analyze the resume and return a strict JSON object with the exact schema requested.
     `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+    const response = await callGemini({
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -66,7 +64,13 @@ exports.analyzeResume = async (req, res) => {
 
     res.status(200).json(JSON.parse(response.text));
   } catch (error) {
-    console.error("Resume analysis failed:", error);
-    res.status(500).json({ message: "Analysis failed", error: error.message, stack: error.stack });
+    console.error("Resume analysis failed:", error.message?.substring(0, 200));
+    
+    const statusCode = isTransientError(error) ? 503 : 500;
+    const message = isTransientError(error) 
+      ? getCleanErrorMessage(error) 
+      : "Analysis failed. Please try again.";
+
+    res.status(statusCode).json({ message });
   }
 };

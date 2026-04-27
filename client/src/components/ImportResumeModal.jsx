@@ -78,7 +78,7 @@ export default function ImportResumeModal({ isOpen, onClose }) {
       navigate(`/builder?id=${res.data.newResumeId}`);
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.error || err.response?.data?.message || err.message || "Failed to import resume.");
+      setError(err.response?.data?.message || err.message || "Failed to import resume.");
     } finally {
       setLoading(false);
     }

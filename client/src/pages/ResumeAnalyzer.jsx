@@ -125,7 +125,7 @@ export default function ResumeAnalyzer() {
       setResults(res.data);
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.error || err.response?.data?.message || err.message || "Analysis failed.");
+      setError(err.response?.data?.message || err.message || "Analysis failed.");
     } finally {
       setLoading(false);
     }
@@ -152,7 +152,7 @@ export default function ResumeAnalyzer() {
       navigate(`/builder?id=${res.data.newResumeId}`);
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.error || err.response?.data?.message || err.message || "Auto-improve failed.");
+      setError(err.response?.data?.message || err.message || "Auto-improve failed.");
     } finally {
       setIsImproving(false);
     }

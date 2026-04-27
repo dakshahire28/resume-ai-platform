@@ -1,7 +1,6 @@
-const { GoogleGenAI, Type } = require('@google/genai');
+const { Type } = require('@google/genai');
 const Resume = require('../models/Resume');
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const { callGemini, getCleanErrorMessage, isTransientError } = require('../utils/geminiHelper');
 
 const resumeDataSchema = {
   type: Type.OBJECT,
@@ -123,8 +122,7 @@ exports.autoImproveResume = async (req, res) => {
       return res.status(400).json({ message: "Invalid source" });
     }
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+    const response = await callGemini({
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -147,8 +145,14 @@ exports.autoImproveResume = async (req, res) => {
 
     res.status(200).json({ message: "Success", newResumeId: newResume._id });
   } catch (error) {
-    console.error("Auto-improve failed:", error);
-    res.status(500).json({ message: "Auto-improve failed", error: error.message, stack: error.stack });
+    console.error("Auto-improve failed:", error.message?.substring(0, 200));
+    
+    const statusCode = isTransientError(error) ? 503 : 500;
+    const message = isTransientError(error) 
+      ? getCleanErrorMessage(error) 
+      : "Auto-improve failed. Please try again.";
+
+    res.status(statusCode).json({ message });
   }
 };
 
@@ -180,8 +184,7 @@ exports.generateCSS = async (req, res) => {
       ${currentCss ? `Current CSS to append to or modify:\n${currentCss}\n` : ''}
     `;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+    const response = await callGemini({
       contents: systemPrompt,
     });
 
@@ -193,7 +196,13 @@ exports.generateCSS = async (req, res) => {
 
     res.status(200).json({ css: rawCss.trim() });
   } catch (error) {
-    console.error("Generate CSS failed:", error);
-    res.status(500).json({ message: "Generate CSS failed", error: error.message });
+    console.error("Generate CSS failed:", error.message?.substring(0, 200));
+    
+    const statusCode = isTransientError(error) ? 503 : 500;
+    const message = isTransientError(error) 
+      ? getCleanErrorMessage(error) 
+      : "CSS generation failed. Please try again.";
+
+    res.status(statusCode).json({ message });
   }
 };
