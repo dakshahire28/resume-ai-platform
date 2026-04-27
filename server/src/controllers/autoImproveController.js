@@ -73,7 +73,7 @@ const resumeDataSchema = {
 
 exports.autoImproveResume = async (req, res) => {
   try {
-    const { source, resumeId, resumeText, missingKeywords, targetJob } = req.body;
+    const { source, resumeId, resumeText, pdfFileName, missingKeywords, targetJob } = req.body;
 
     if (!process.env.GEMINI_API_KEY) {
       return res.status(500).json({ message: "GEMINI_API_KEY is missing." });
@@ -135,7 +135,7 @@ exports.autoImproveResume = async (req, res) => {
     // Create a new clone/import so we don't destroy their original one immediately
     const newResume = new Resume({
       user: req.user._id,
-      title: source === 'saved' ? `(AI Improved) ${baseData.title}` : `Imported Resume`,
+      title: source === 'saved' ? `(AI Improved) ${baseData.title}` : (pdfFileName || 'Imported Resume'),
       template: source === 'saved' ? baseData.template : 'Modern',
       settings: source === 'saved' ? baseData.settings : undefined,
       data: parsedData

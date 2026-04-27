@@ -67,9 +67,13 @@ export default function ImportResumeModal({ isOpen, onClose }) {
       // Limit string to 30k characters to prevent TLS/SSL payload bloat to Gemini API
       const safeText = extractedText.substring(0, 30000);
 
+      // Extract filename without extension to use as the resume title
+      const pdfFileName = pdfFile.name.replace(/\.pdf$/i, '');
+
       const res = await axios.post('/api/resumes/auto-improve', {
         source: 'pdf',
         resumeText: safeText,
+        pdfFileName,
         missingKeywords: [], // No target job or keywords, just straight parse
         targetJob: 'Professional'
       });
